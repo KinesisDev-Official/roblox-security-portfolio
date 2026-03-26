@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinesis.Dev — Roblox Security</title>
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2212/2212809.png">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --sidebar: #080808;
+  --card: #0c0c0c;
+  --card-hover: #111111;
+  --border: #1f1f1f;
+  --border-hover: #333;
+  --accent: #ffffff;
+  --accent-blue: #0071e3;
+  --danger: #ef4444;
+  --danger-dim: rgba(239,68,68,0.08);
+  --success: #22c55e;
+  --success-dim: rgba(34,197,94,0.08);
+  --warn: #f59e0b;
+  --text-p: #71717a;
+  --text-s: #52525b;
+  --text-h: #ffffff;
+  --radius: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; outline: none; text-decoration: none; color: inherit; }
+
+body {
+  font-family: 'Geist', sans-serif;
+  background: var(--bg);
+  color: var(--text-h);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 32px 16px;
+  gap: 4px;
+}
+
+.logo {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 40px;
+  padding: 0 6px;
+}
+
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
+
+.logo span { color: var(--text-p); font-weight: 400; }
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-s);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 10px;
+  margin: 16px 0 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-p);
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.nav-item:hover { color: #d4d4d8; background: rgba(255,255,255,0.03); }
+.nav-item.active { background: #ffffff; color: #000; font-weight: 600; border-color: transparent; }
+.nav-item .nav-ico { font-size: 14px; opacity: 0.7; }
+.nav-item.active .nav-ico { opacity: 1; }
+
+.sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(34,197,94,0.07);
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--success);
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.lang-switch {
+  display: flex;
+  gap: 4px;
+  background: #000;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.lang-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-s);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.lang-btn:hover { color: var(--text-p); }
+.lang-btn.active { background: var(--border); color: #fff; }
+
+/* ─── MAIN ─── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  background: var(--bg);
+}
+
+.page {
+  display: none;
+  padding: 64px 7%;
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeUp 0.25s ease-out;
+}
+
+.page.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── SHARED TYPOGRAPHY ─── */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-s);
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+}
+
+h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; }
+h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+
+.lead {
+  font-size: 17px;
+  color: var(--text-p);
+  line-height: 1.6;
+  max-width: 540px;
+  margin-bottom: 40px;
+}
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 48px 0;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  font-family: 'Geist', sans-serif;
+}
+
+.btn-white { background: #fff; color: #000; }
+.btn-white:hover { background: #e4e4e7; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-p);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--border-hover); color: #fff; }
+
+.btn-discord { background: #5865F2; color: #fff; }
+.btn-discord:hover { background: #4752c4; }
+
+/* ─── HOME PAGE ─── */
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-p);
+  margin-bottom: 28px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hero-kicker-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+}
+
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 64px;
+}
+
+.feature-item {
+  background: var(--bg);
+  padding: 28px 24px;
+  transition: 0.2s;
+}
+
+.feature-item:hover { background: var(--card); }
+
+.feature-icon {
+  font-size: 20px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.feature-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.feature-item p { font-size: 13px; color: var(--text-p); line-height: 1.5; }
+
+/* ─── SECURITY PAGE ─── */
+.security-intro {
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.security-intro-icon { font-size: 22px; }
+.security-intro p { font-size: 14px; color: var(--text-p); line-height: 1.6; }
+
+.threat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.threat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: 0.2s;
+}
+
+.threat-card:hover { border-color: var(--border-hover); background: var(--card-hover); }
+
+.threat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.threat-badge {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-critical { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+.badge-high { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.badge-medium { background: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2); }
+
+.threat-card h4 { font-size: 14px; font-weight: 700; }
+.threat-card p { font-size: 13px; color: var(--text-p); line-height: 1.5; margin-top: 8px; }
+
+.process-section { margin-top: 48px; }
+
+.process-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  margin-top: 24px;
+}
+
+.process-step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.process-step:last-child { border-bottom: none; }
+
+.step-num {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-s);
+}
+
+.step-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.step-content p { font-size: 13px; color: var(--text-p); line-height: 1.5; }
+
+/* ─── PRICING PAGE ─── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.plan-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+
+.plan-card.featured {
+  border-color: rgba(239,68,68,0.3);
+  background: linear-gradient(160deg, #0c0c0c 0%, rgba(239,68,68,0.04) 100%);
+}
+
+.plan-tag {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.plan-tag.popular { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+
+.plan-icon { font-size: 22px; }
+
+.plan-card h3 { font-size: 16px; font-weight: 800; }
+
+.plan-desc { font-size: 13px; color: var(--text-p); line-height: 1.5; }
+
+.plan-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.plan-price span { font-size: 13px; color: var(--text-s); font-weight: 400; }
+
+.plan-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-features li {
+  font-size: 13px;
+  color: var(--text-p);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-features li::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--text-s);
+  min-width: 4px;
+}
+
+.plan-card .btn { margin-top: auto; width: 100%; justify-content: center; }
+
+/* ─── CONTACT BLOCK ─── */
+.contact-block {
+  margin-top: 48px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.contact-left h3 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.contact-left p { font-size: 14px; color: var(--text-p); }
+
+.contact-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 200px;
+}
+
+.discord-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 7px;
+  color: #fff;
+}
+
+/* ─── LANG ─── */
+.lang-fr { display: none !important; }
+.lang-en { display: inline !important; }
+body.fr .lang-fr { display: inline !important; }
+body.fr .lang-en { display: none !important; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .sidebar { width: 200px; min-width: 200px; padding: 24px 12px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .contact-block { flex-direction: column; align-items: flex-start; }
+  .contact-right { align-items: flex-start; min-width: unset; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Kinesis<span>.Dev</span>
+  </div>
+
+  <div class="nav-label">Menu</div>
+  <div class="nav-item active" onclick="goTo('home', this)">
+    <span class="nav-ico">⌂</span> <span class="lang-en">Home</span><span class="lang-fr">Accueil</span>
+  </div>
+  <div class="nav-item" onclick="goTo('security', this)">
+    <span class="nav-ico">🛡</span> <span class="lang-en">Security</span><span class="lang-fr">Sécurité</span>
+  </div>
+  <div class="nav-item" onclick="goTo('pricing', this)">
+    <span class="nav-ico">◈</span> <span class="lang-en">Pricing</span><span class="lang-fr">Tarifs</span>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span class="lang-en">Available now</span>
+      <span class="lang-fr">Disponible</span>
+    </div>
+    <div class="lang-switch">
+      <button class="lang-btn" onclick="setLang('fr', event)">FR</button>
+      <button class="lang-btn active" onclick="setLang('en', event)">EN</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+
+  <!-- HOME -->
+  <div id="page-home" class="page active">
+    <div class="hero-kicker">
+      <div class="hero-kicker-dot"></div>
+      <span class="lang-en">Roblox Security Specialist</span>
+      <span class="lang-fr">Spécialiste Sécurité Roblox</span>
+    </div>
+
+    <h1 class="lang-en">Game Security.<br>Manual Fixing.</h1>
+    <h1 class="lang-fr">Sécurité de jeu.<br>Correction manuelle.</h1>
+
+    <p class="lead lang-en">Analysis of hidden exploits, full removal of backdoors, and proper securing of your Roblox experience. Done by hand, not by script.</p>
+    <p class="lead lang-fr">Analyse d'exploits cachés, suppression complète des backdoors et sécurisation de votre expérience Roblox. Fait manuellement, pas automatiquement.</p>
+
+    <div class="hero-btns">
+      <button class="btn btn-white" onclick="goTo('pricing', document.querySelectorAll('.nav-item')[2])">
+        <span class="lang-en">View Pricing</span>
+        <span class="lang-fr">Voir les tarifs</span>
+      </button>
+      <button class="btn btn-ghost" onclick="goTo('security', document.querySelectorAll('.nav-item')[1])">
+        <span class="lang-en">How it works</span>
+        <span class="lang-fr">Comment ça marche</span>
+      </button>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="feature-icon">🔍</span>
+        <h4><span class="lang-en">Full Audit</span><span class="lang-fr">Audit Complet</span></h4>
+        <p class="lang-en">Every script, module and remote analyzed manually.</p>
+        <p class="lang-fr">Chaque script, module et remote analysé manuellement.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🗑️</span>
+        <h4><span class="lang-en">Backdoor Removal</span><span class="lang-fr">Suppression Backdoors</span></h4>
+        <p class="lang-en">Infected assets detected and eliminated at root.</p>
+        <p class="lang-fr">Assets infectés détectés et supprimés à la source.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">⚡</span>
+        <h4><span class="lang-en">Fast Delivery</span><span class="lang-fr">Livraison Rapide</span></h4>
+        <p class="lang-en">Most jobs completed within 24 hours.</p>
+        <p class="lang-fr">La plupart des missions terminées en moins de 24h.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div id="page-security" class="page">
+    <div class="eyebrow lang-en">Security</div>
+    <div class="eyebrow lang-fr">Sécurité</div>
+
+    <h2 style="margin-bottom: 10px;">
+      <span class="lang-en">Threats I Handle</span>
+      <span class="lang-fr">Menaces que je traite</span>
+    </h2>
+    <p class="lead" style="margin-bottom: 32px; font-size: 15px;">
+      <span class="lang-en">These are the most common security issues found in Roblox games — most developers have no idea they exist.</span>
+      <span class="lang-fr">Ce sont les problèmes de sécurité les plus fréquents dans les jeux Roblox — la plupart des développeurs ne savent pas qu'ils existent.</span>
+    </p>
+
+    <div class="threat-grid">
+      <div class="threat-card">
+        <div class="threat-header">
+          <span class="threat-badge badge-critical">
+            <span class="lang-en">Critical</span><span class="lang-fr">Critique</span>
+          </span>
+          <h4><span class="lang-en">Backdoor Scripts</span><span class="lang-fr">Scripts Backdoor</span></h4>
+        </div>
+        <p class="lang-en">Hidden remote events that allow attackers to run arbitrary code in your game at any time, even after you publish updates.</p>
+        <p class="lang-fr">Événements distants cachés permettant à des attaquants d'exécuter du code arbitraire dans votre jeu, même après des mises à jour.</p>
+      </div>
+
+      <div class="threat-card">
+        <div class="threat-header">
+          <span class="threat-badge badge-critical">
+            <span class="lang-en">Critical</span><span class="lang-fr">Critique</span>
+          </span>
+          <h4><span class="lang-en">Fake Admin Scripts</span><span class="lang-fr">Faux Scripts Admin</span></h4>
+        </div>
+        <p class="lang-en">Malicious admin systems that look legitimate but secretly give hackers god-mode access to your entire game.</p>
+        <p class="lang-fr">Systèmes d'admin malveillants qui semblent légitimes mais donnent secrètement un accès total aux hackers.</p>
+      </div>
+
+      <div class="threat-card">
+        <div class="threat-header">
+          <span class="threat-badge badge-high">
+            <span class="lang-en">High</span><span class="lang-fr">Élevé</span>
+          </span>
+          <h4><span class="lang-en">Popup Injectors</span><span class="lang-fr">Injecteurs Popup</span></h4>
+        </div>
+        <p class="lang-en">Scripts that display scam links, fake giveaways or Robux phishing in your game's UI, targeting your players.</p>
+        <p class="lang-fr">Scripts qui affichent des liens frauduleux, des faux cadeaux ou du phishing Robux dans votre jeu.</p>
+      </div>
+
+      <div class="threat-card">
+        <div class="threat-header">
+          <span class="threat-badge badge-high">
+            <span class="lang-en">High</span><span class="lang-fr">Élevé</span>
+          </span>
+          <h4><span class="lang-en">DataStore Exploits</span><span class="lang-fr">Exploits DataStore</span></h4>
+        </div>
+        <p class="lang-en">Unprotected remote functions that allow players to read or corrupt other players' data and game economy.</p>
+        <p class="lang-fr">Fonctions distantes non protégées permettant aux joueurs de lire ou corrompre les données d'autres joueurs.</p>
+      </div>
+
+      <div class="threat-card">
+        <div class="threat-header">
+          <span class="threat-badge badge-medium">
+            <span class="lang-en">Medium</span><span class="lang-fr">Moyen</span>
+          </span>
+          <h4><span class="lang-en">Script Lag / Loops</span><span class="lang-fr">Lag / Boucles Infinies</span></h4>
+        </div>
+        <p class="lang-en">Unoptimized or leftover scripts causing unnecessary server load, FPS drops, and poor player experience.</p>
+        <p class="lang-fr">Scripts non optimisés causant une charge serveur inutile, des chutes de FPS et une mauvaise expérience joueur.</p>
+      </div>
+
+      <div class="threat-card">
+        <div class="threat-header">
+          <span class="threat-badge badge-medium">
+            <span class="lang-en">Medium</span><span class="lang-fr">Moyen</span>
+          </span>
+          <h4><span class="lang-en">Remote Vulnerabilities</span><span class="lang-fr">Vulnérabilités Remote</span></h4>
+        </div>
+        <p class="lang-en">RemoteEvents and RemoteFunctions with no server-side validation, exploitable by any cheating client.</p>
+        <p class="lang-fr">RemoteEvents et RemoteFunctions sans validation côté serveur, exploitables par n'importe quel client tricheur.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="process-section">
+      <h3 style="margin-bottom: 4px; font-size: 18px;">
+        <span class="lang-en">My Process</span>
+        <span class="lang-fr">Mon Processus</span>
+      </h3>
+      <p style="font-size: 13px; color: var(--text-p); margin-bottom: 24px;">
+        <span class="lang-en">Every job follows the same rigorous steps.</span>
+        <span class="lang-fr">Chaque mission suit les mêmes étapes rigoureuses.</span>
+      </p>
+
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <h4><span class="lang-en">Initial Contact</span><span class="lang-fr">Premier contact</span></h4>
+            <p class="lang-en">You describe the issue on Discord. I ask the right questions to understand the scope before starting.</p>
+            <p class="lang-fr">Vous décrivez le problème sur Discord. Je pose les bonnes questions pour comprendre la portée avant de commencer.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <h4><span class="lang-en">Full Audit</span><span class="lang-fr">Audit complet</span></h4>
+            <p class="lang-en">I go through every script and model in your game manually. No automated scanners — human eyes only.</p>
+            <p class="lang-fr">Je passe en revue chaque script et modèle de votre jeu manuellement. Pas de scanners automatiques.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <h4><span class="lang-en">Threat Report</span><span class="lang-fr">Rapport de menaces</span></h4>
+            <p class="lang-en">You receive a detailed report of everything found — what it does, how it got there, and how I'll fix it.</p>
+            <p class="lang-fr">Vous recevez un rapport détaillé de tout ce qui a été trouvé — ce que ça fait, comment c'est arrivé, et comment je vais le corriger.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <h4><span class="lang-en">Manual Fix + Delivery</span><span class="lang-fr">Correction manuelle + Livraison</span></h4>
+            <p class="lang-en">Everything is removed and patched. You get a clean version of your game, ready to publish.</p>
+            <p class="lang-fr">Tout est supprimé et corrigé. Vous recevez une version propre de votre jeu, prête à être publiée.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div id="page-pricing" class="page">
+    <div class="eyebrow lang-en">Pricing</div>
+    <div class="eyebrow lang-fr">Tarifs</div>
+
+    <h2 style="margin-bottom: 10px;">
+      <span class="lang-en">Simple, Honest Pricing</span>
+      <span class="lang-fr">Tarifs simples et honnêtes</span>
+    </h2>
+    <p class="lead" style="font-size: 15px;">
+      <span class="lang-en">No hidden fees. You know what you're paying for before we start.</span>
+      <span class="lang-fr">Aucun frais caché. Vous savez ce que vous payez avant qu'on commence.</span>
+    </p>
+
+    <div class="pricing-grid">
+      <div class="plan-card">
+        <span class="plan-icon">⚡</span>
+        <h3><span class="lang-en">FPS Optimization</span><span class="lang-fr">Optimisation FPS</span></h3>
+        <p class="plan-desc lang-en">Script lag removal, loop cleanup, and general performance tuning for smoother gameplay.</p>
+        <p class="plan-desc lang-fr">Suppression du lag, nettoyage des boucles et optimisation générale pour un gameplay plus fluide.</p>
+        <div class="plan-price">150 R$ <span>/ one-time</span></div>
+        <ul class="plan-features">
+          <li><span class="lang-en">Script performance audit</span><span class="lang-fr">Audit performance scripts</span></li>
+          <li><span class="lang-en">Loop & wait() cleanup</span><span class="lang-fr">Nettoyage boucles & wait()</span></li>
+          <li><span class="lang-en">Server load reduction</span><span class="lang-fr">Réduction charge serveur</span></li>
+        </ul>
+        <button class="btn btn-ghost" onclick="copyDiscord()">
+          <span class="lang-en">Contact me</span><span class="lang-fr">Me contacter</span>
+        </button>
+      </div>
+
+      <div class="plan-card featured">
+        <span class="plan-tag popular">
+          <span class="lang-en">Popular</span><span class="lang-fr">Populaire</span>
+        </span>
+        <span class="plan-icon">🛡️</span>
+        <h3><span class="lang-en">Backdoor Disinfection</span><span class="lang-fr">Désinfection Backdoor</span></h3>
+        <p class="plan-desc lang-en">Full manual removal of backdoors, popups, fake admin systems and all infected assets.</p>
+        <p class="plan-desc lang-fr">Suppression manuelle complète des backdoors, popups, faux admins et assets infectés.</p>
+        <div class="plan-price">300 R$ <span>/ one-time</span></div>
+        <ul class="plan-features">
+          <li><span class="lang-en">Full game audit</span><span class="lang-fr">Audit complet du jeu</span></li>
+          <li><span class="lang-en">Backdoor removal</span><span class="lang-fr">Suppression backdoors</span></li>
+          <li><span class="lang-en">Fake admin cleanup</span><span class="lang-fr">Nettoyage faux admins</span></li>
+          <li><span class="lang-en">Threat report included</span><span class="lang-fr">Rapport de menaces inclus</span></li>
+        </ul>
+        <button class="btn btn-white" onclick="copyDiscord()">
+          <span class="lang-en">Contact me</span><span class="lang-fr">Me contacter</span>
+        </button>
+      </div>
+
+      <div class="plan-card">
+        <span class="plan-icon">🗄️</span>
+        <h3><span class="lang-en">DataStore Security</span><span class="lang-fr">Sécurité DataStore</span></h3>
+        <p class="plan-desc lang-en">Corrupted data repair, remote validation hardening and exploit protection for your data layer.</p>
+        <p class="plan-desc lang-fr">Réparation de données corrompues, durcissement des remotes et protection contre les exploits de données.</p>
+        <div class="plan-price">200 R$ <span>/ one-time</span></div>
+        <ul class="plan-features">
+          <li><span class="lang-en">DataStore audit</span><span class="lang-fr">Audit DataStore</span></li>
+          <li><span class="lang-en">Remote validation fix</span><span class="lang-fr">Correction validation remote</span></li>
+          <li><span class="lang-en">Corrupted data repair</span><span class="lang-fr">Réparation données corrompues</span></li>
+        </ul>
+        <button class="btn btn-ghost" onclick="copyDiscord()">
+          <span class="lang-en">Contact me</span><span class="lang-fr">Me contacter</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="contact-block">
+      <div class="contact-left">
+        <h3>
+          <span class="lang-en">Ready to secure your game?</span>
+          <span class="lang-fr">Prêt à sécuriser votre jeu ?</span>
+        </h3>
+        <p>
+          <span class="lang-en">Add me on Discord for immediate intervention. Usually respond within a few hours.</span>
+          <span class="lang-fr">Ajoutez-moi sur Discord pour une intervention immédiate. Je réponds généralement en quelques heures.</span>
+        </p>
+      </div>
+      <div class="contact-right">
+        <div class="discord-id" id="discord-tag">kinesis.dev</div>
+        <button class="btn btn-discord" onclick="copyDiscord()">
+          <span class="lang-en">Copy Discord ID</span>
+          <span class="lang-fr">Copier l'ID Discord</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentLang = 'en';
+
+function goTo(p, el) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+
+  const pageMap = { home: 'page-home', security: 'page-security', pricing: 'page-pricing' };
+  const target = document.getElementById(pageMap[p]);
+  if (target) target.classList.add('active');
+
+  if (el) {
+    el.classList.add('active');
+  } else {
+    const navIndex = { home: 0, security: 1, pricing: 2 };
+    const navItems = document.querySelectorAll('.nav-item');
+    if (navItems[navIndex[p]]) navItems[navIndex[p]].classList.add('active');
+  }
+
+  document.querySelector('.main').scrollTo(0, 0);
+}
+
+function copyDiscord() {
+  const tag = document.getElementById('discord-tag').innerText;
+  navigator.clipboard.writeText(tag).catch(() => {});
+
+  const btns = document.querySelectorAll('.btn-discord, .btn-copy');
+  btns.forEach(btn => {
+    const original = btn.innerHTML;
+    btn.innerHTML = currentLang === 'fr' ? '✓ Copié !' : '✓ Copied!';
+    setTimeout(() => { btn.innerHTML = original; }, 2000);
+  });
+}
+
+function setLang(l, e) {
+  currentLang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if (e && e.target) e.target.classList.add('active');
+  document.body.classList.toggle('fr', l === 'fr');
+}
+</script>
+
+</body>
+</html>
